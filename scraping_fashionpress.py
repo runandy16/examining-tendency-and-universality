@@ -4,6 +4,10 @@ import json
 import re
 from tqdm import tqdm
 
+try:
+    from my_packages import my_functions
+except ImportError:
+    import my_functions
 
 class SetEncoder(json.JSONEncoder):
     def default(self, obj):
@@ -11,21 +15,8 @@ class SetEncoder(json.JSONEncoder):
             return list(obj)
         return json.JSONEncoder.default(self, obj)
 
-def output_json(data, output_file, output_dir='', type_='w'):
-    """データをTSVファイルに出力"""
-
-    if output_dir:
-        output_file = output_dir + '/' + output_file
-
-    with open(output_file, type_,encoding='utf-8') as f:
-        f.write(json.dumps(data, indent=4, ensure_ascii=False, cls=SetEncoder))
-        # f.write(json.dumps(data, indent=4, ensure_ascii=False))
-
 class ScrapingWear(object):
-
-
     def __init__(self):
-
         self.rank_page_url = 'https://www.fashion-press.net/news/search/'
         self.ganres =  ['fashion','beauty','gourmet','art','movie','music','lifestyle']
         self.data = {'fashion':[],'beauty':[],'gourmet':[],'art':[],'movie':[],'music':[],'lifestyle':[]}
@@ -85,7 +76,7 @@ class ScrapingWear(object):
 
                         if page_data not in self.data[genre]:
                             self.data[genre].append(page_data)
-                        output_json(self.data, 'fashion_press.json')
+                        my_functions.output_json(self.data, 'outputs/fashion_press.json')
 
                     except:
                         continue

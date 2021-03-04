@@ -1,37 +1,47 @@
+import pandas as pd
+import numpy as np
 
 try:
     from my_packages import my_functions
 except ImportError:
     import my_functions
 
+def zscore(x, axis=None):
+    xmean = x.mean(axis=axis, keepdims=True)
+    xstd = np.std(x, axis=axis, keepdims=True)
+    zscore = (x - xmean) / xstd
+    return zscore
 
 class TimeAnalysis(object):
 
     def __init__(self):
-        self.all_original_data = my_functions.load_json('fashion_press.json')
+        self.all_original_data = my_functions.load_json('outputs/fashion_press.json')
         self.count_impression = {}
 
         self.timeline_data = {}
         self.count_data = {}
         self.parse_num = {}
+        self.frequency_data = {}
+
         self.spring = ['03', '04', '05']
         self.summer = ['06', '07', '08']
         self.autumn = ['09', '10' ,'11']
         self.winter = ['12', '01', '02']
 
         self.impression_words = []
+        self.database = {}
 
     def run(self):
         self.count_impression_word()
         self.modification_to_timeline_data()
         self.count_per_timeline()
         self.compare_fashion_word()
-        my_functions.output_json(self.count_data, 'count_data.json','/opt/project/PythonOutputs/fashionpress/test')
+        my_functions.output_json(self.count_data, 'outputs/count_data.json')
 
     def count_impression_word(self):
-
+        """ 印象語の選定"""
         for genre, original_data in self.all_original_data.items():
-            parse_data = my_functions.load_json(f'/parse_data/{genre}/database_review.json')
+            parse_data = my_functions.load_json(f'outputs/parse_data/{genre}/database_review.json')
             word_count = {}
             text_num = int(parse_data['info_parsed'][0][0].strip('総テキスト数: '))
             for text in parse_data['texts_list_impression']:
@@ -59,55 +69,65 @@ class TimeAnalysis(object):
                 self.impression_words.append(word)
 
     def modification_to_timeline_data(self):
-        for genre, original_data in self.original_data.items():
+        """ 季節ごとにデータを分割"""
+        for genre, original_data in self.all_original_data.items():
             timeline_data = {str(i):{'spring':[], 'summer':[], 'autumn':[], 'winter':[]} for i in range(2010,2021)}
-            self.parse_data = my_functions.load_json(f'/opt/project/PythonOutputs/fashionpress/parse_data/{genre}2/database_review.json')
+            self.parse_data = my_functions.load_json(f'outputs/parse_data/{genre}/database_review.json')
 
             for text, genre_data in zip(self.parse_data['texts_list_impression'], original_data):
-                # try:
-                    if genre_data['time'][:7].replace('-','')[-2:] in self.spring:
-                        timeline_data[genre_data['time'][:4]]['spring'].append(text)
-                    if genre_data['time'][:7].replace('-','')[-2:] in self.summer:
-                        timeline_data[genre_data['time'][:4]]['summer'].append(text)
-                    if genre_data['time'][:7].replace('-','')[-2:] in self.autumn:
-                        timeline_data[genre_data['time'][:4]]['autumn'].append(text)
-                    if genre_data['time'][:7].replace('-','')[-2:] in self.winter:
-                        timeline_data[genre_data['time'][:4]]['winter'].append(text)
-                        #
-                        # if genre_data['time'][:7].replace('-','')[-2:] != '12':
-                        #     timeline_data[str(int(genre_data['time'][:4])-1)]['winter'].append(text)
-                        # else:
-                        #     timeline_data[genre_data['time'][:4]]['winter'].append(text)
-                # print(genre_data['time'][:7].replace('-','')[-2:])
-                # try:
-                #     timeline_data[genre_data['time'][:4]].append(text)
-                # except:
-                #     continue
+                if genre_data['time'][:7].replace('-','')[-2:] in self.spring:
+                    timeline_data[genre_data['time'][:4]]['spring'].append(text)
+                if genre_data['time'][:7].replace('-','')[-2:] in self.summer:
+                    timeline_data[genre_data['time'][:4]]['summer'].append(text)
+                if genre_data['time'][:7].replace('-','')[-2:] in self.autumn:
+                    timeline_data[genre_data['time'][:4]]['autumn'].append(text)
+                if genre_data['time'][:7].replace('-','')[-2:] in self.winter:
+                    timeline_data[genre_data['time'][:4]]['winter'].append(text)
             self.timeline_data[genre] = timeline_data
 
     def count_per_timeline(self):
         for genre, timeline_data in self.timeline_data.items():
             self.count_data[genre] = {str(i):{'spring':{}, 'summer':{}, 'autumn':{}, 'winter':{}}  for i in range(2010,2021)}
             self.parse_num[genre] = {str(i):{'spring':'', 'summer':'', 'autumn':'', 'winter':''}  for i in range(2010,2021)}
+            self.frequency_data = {str(i):{'spring':{}, 'summer':{}, 'autumn':{}, 'winter':{}}  for i in range(2010,2021)}
 
             for time, dic in timeline_data.items():
-                for season,texts in dic.items():
+                for season, texts in dic.items():
                     self.parse_num[genre][time][season] = len(texts)
                     print(genre, time, season, len(texts))
                     for text in texts:
                         count_data = []
                         for word in text:
-                            # if word not in count_data and word in self.impression_words:
-                                self.count_data[genre][time][season][word] = self.count_data[genre][time][season].get(word, 0) + 1
+                            if word in self.impression_words:
+                                self.count_data[genre][time][season][word] = self.count_data[genre][time][season].get(
+                                    word, 0) + 1
                                 count_data.append(word)
+                    for k, v in self.count_data[genre][time][season].items():
+                        self.frequency_data[genre][time][season][k] = v / len(texts)
 
 
     def compare_fashion_word(self):
-        for time, dic in self.count_data['fashion'].items():
+        df = pd.DataFrame()
+
+        for time, dic in self.frequency_data['fashion'].items():
             for season, s_dic in dic.items():
-                my_functions.output_count_word(s_dic,f'{time}_{season}count.tsv','/opt/project/PythonOutputs/fashionpress/test')
+                words = list(s_dic.keys())
+                frequency = list(s_dic.values())
+                s = pd.Series(frequency, index=words, name=f'{time}_{season}')
+                df = df.append(s)
 
+        self.df = (df.fillna(0)).T
+        self.impression_words = self.df.index.values
+        self.fashion_times = self.df.columns.values
+        self.season_vecs = zscore(self.df.values, axis=1).tolist()
 
+    def output(self):
+
+        self.database['impression_words']  = self.impression_words
+        self.database['season_vecs'] = self.season_vecs
+        self.database['fashion_times'] = self.fashion_times
+
+        my_functions.output_json(self.database, 'outputs/database_vecs.json')
 
 if __name__ == '__main__':
     test = TimeAnalysis()

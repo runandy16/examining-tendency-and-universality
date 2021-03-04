@@ -8,7 +8,7 @@ examining-tendency-and-universalityは印象の普遍性と時代性の切り分
 docker build -t knp_neologd:python3 /examining_tendency_and_universality/knp_neologd:python3
 ``` 
 
-### Scraping
+### データ収集
 
 本実験はFashion Pressのニュース記事を使用します．
 
@@ -36,7 +36,7 @@ docker build -t knp_neologd:python3 /examining_tendency_and_universality/knp_neo
 }
 ``` 
 
-### Preprocessing
+### 前処理
 
 収集したニュース記事のテキストを前処理（形態素解析+係り受け解析）します。
 
@@ -64,22 +64,35 @@ python parse_newsarticles.py
 - ``` database_{カテゴリ}.json``` : すべてのデータベースを格納
 
 
-### 時系列データの作成
+### 印象語の時系列データ化
 
 他カテゴリとの印象語出現頻度の比較をします。
 ファッションカテゴリにおいて以下の条件を満たす印象語を抽出し，期間ごとに出現確率を求めて標準化を行います。
 - 0.5% 以上のページに出現
-- 他ドメインカテゴリでの出現確率との差分が0.5 % 以上
+- 他ドメインカテゴリでの出現確率との差分が0.5 % 以上
 
 ```
 python pop_frequency_comparison.py
 ```
 
-### 状態空間モデルによる要因分解
+- ``` outputs/database_vecs.json```: 選定後の印象後のリスト/時系列ごとの印象語の出現確率
+
+### 状態空間モデルによる時系列分析
 
 作成した時系列データをロードし、状態空間モデルを構築します。
 モデル構築後、潜在的な時系列傾向である内部状態または季節変動をクラスタリングします（AICによってクラスタ数を定める）．
 
 ```
 python clustering_fluctuation.py
+```
+- ```impressions_trend/{word}_trend.png```: {印象後}の状態空間モデルによる要因分解結果
+- ```impressions_trend```: 要因分解結果をk-meansによりクラスタリングした出力ファイル
+
+
+### Word2Vecによる感性評価指標の抽出
+
+時系列傾向のパターンごとにWord2Vecを用いた階層クラスタリングを行う。
+
+```
+python impression_clustering.py
 ```

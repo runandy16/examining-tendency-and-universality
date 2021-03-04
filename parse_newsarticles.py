@@ -869,8 +869,6 @@ class ParseText(object):
                 word += '(-)' if negation_word_flag else ''  # 否定の場合マークを付ける
 
                 if word not in self.page_words:
-                    # self.count_one_vocabulary.add(word)
-                    # print(self.count_one_vocabulary)
                     self.page_words.append(word)
 
                     if evaluation_type:
@@ -1058,19 +1056,17 @@ class ParseText(object):
 
 
 if __name__ == '__main__':
-    wear_dir = r'/root/fashion'
-    dictionary_dir = r'/root/dictionary'
-    represent_dir = r'/root/database'
+    data_dir = r'/outputs'
+    dictionary_dir = r'/dictionary'
 
-    load = LoadDictionaryData(data_dir=wear_dir,
-                              represent_dir=represent_dir,
+    load = LoadDictionaryData(data_dir=data_dir,
+                              represent_dir=dictionary_dir,
                               dictionary_dir=dictionary_dir,
                               load_flag=True)
     dictionary_data = load.run()
-    adjective_dir = r'/root/database'
 
-    test = ParseText(data_dir=wear_dir,
-                     adjective_dir=adjective_dir,
+    test = ParseText(data_dir=data_dir,
+                     adjective_dir=dictionary_dir,
                      impression_dict=dictionary_data.impression_dict,
                      emotion_comb_dict=dictionary_data.emotion_comb_dict,
                      emotion_dict=dictionary_data.emotion_dict)
