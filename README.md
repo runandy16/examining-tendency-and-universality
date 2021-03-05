@@ -3,6 +3,7 @@
 ### Buillding examining-tendency-and-universality
 examining-tendency-and-universalityは印象の普遍性と時代性の切り分けを行うデモツールです．
 次のコマンドでDockerによる環境構築を行ってください．
+（詳しい処理はmain.pdfを参照）
 
 ``` 
 docker build -t knp_neologd:python3 /examining_tendency_and_universality/knp_neologd:python3
