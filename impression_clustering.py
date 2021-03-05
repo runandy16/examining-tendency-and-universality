@@ -32,7 +32,7 @@ class EstimateSimilarities(object):
         self.num_clusters = num_clusters
         self.output_dir = 'impression_cluster'
 
-        database = my_functions.load_json('outputs/parse_data/fashion/database_review.json')
+        database = my_functions.load_json('outputs/fashion/database_newsarticles.json')
 
         self.count_link_all = database['count_link_direct']
         self.reviews_list_all = database['texts_list_all']
@@ -207,7 +207,7 @@ def cos_sim(v1, v2):
 
 
 def test():
-    data_dir = 'outputs/parse_data/fashion'
+    data_dir = 'outputs/fashion'
 
     es = EstimateSimilarities(threshold=40,  # cos距離を区切る割合
                               data_dir=data_dir,

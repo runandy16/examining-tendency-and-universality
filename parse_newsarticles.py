@@ -982,8 +982,8 @@ class ParseText(object):
         if not os.path.isdir(self.data_dir):
             os.mkdir(self.data_dir)
 
-        database = my_functions.output_json({}, 'database_review.json', self.data_dir)
-        database = my_functions.load_json('database_review.json', self.data_dir)
+        database = my_functions.output_json({}, 'database_newsarticles.json', self.data_dir)
+        database = my_functions.load_json('database_newsarticles.json', self.data_dir)
 
         for type_ in self.types:
             # 出現頻度の多い順に単語を並べたファイルを出力
@@ -1051,7 +1051,7 @@ class ParseText(object):
 
         database['info_parsed'] = information
 
-        my_functions.output_json(database, 'database_review.json', self.data_dir)
+        my_functions.output_json(database, 'database_newsarticles.json', self.data_dir)
         my_functions.output_tsv(information, 'info_parsed.tsv', self.data_dir)
 
 

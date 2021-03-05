@@ -41,7 +41,7 @@ class TimeAnalysis(object):
     def count_impression_word(self):
         """ 印象語の選定"""
         for genre, original_data in self.all_original_data.items():
-            parse_data = my_functions.load_json(f'outputs/parse_data/{genre}/database_review.json')
+            parse_data = my_functions.load_json(f'outputs/{genre}/database_newsarticles.json')
             word_count = {}
             text_num = int(parse_data['info_parsed'][0][0].strip('総テキスト数: '))
             for text in parse_data['texts_list_impression']:
@@ -72,7 +72,7 @@ class TimeAnalysis(object):
         """ 季節ごとにデータを分割"""
         for genre, original_data in self.all_original_data.items():
             timeline_data = {str(i):{'spring':[], 'summer':[], 'autumn':[], 'winter':[]} for i in range(2010,2021)}
-            self.parse_data = my_functions.load_json(f'outputs/parse_data/{genre}/database_review.json')
+            self.parse_data = my_functions.load_json(f'outputs/{genre}/database_newsarticles.json')
 
             for text, genre_data in zip(self.parse_data['texts_list_impression'], original_data):
                 if genre_data['time'][:7].replace('-','')[-2:] in self.spring:

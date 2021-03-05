@@ -62,7 +62,7 @@ python parse_newsarticles.py
 - ``` count_link_co_occur.tsv``` : 印象語と感情語の共起回数
 - ``` count_word_emotion_comb.tsv``` : 製品ごとに見たときに感情語が出てきた回数
 - ``` count_word_noun.tsv``` : 名詞をの出現頻度
-- ``` {カテゴリ}/database_review.json``` : すべてのデータベースを格納
+- ``` {カテゴリ}/database_newsarticles.json``` : すべてのデータベースを格納
 
 
 ### 印象語の時系列データ化
